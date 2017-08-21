@@ -19,7 +19,5 @@ namespace GetClosePrice.Helper
                 excelFile.Save();
             }
         }
-
-     
     }
 }

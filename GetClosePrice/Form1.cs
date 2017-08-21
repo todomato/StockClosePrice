@@ -14,6 +14,8 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using GetClosePrice.Service;
+using AutoMapper;
+using GetClosePrice.Models;
 
 namespace GetClosePrice
 {
@@ -22,13 +24,15 @@ namespace GetClosePrice
         string _tsePricePath = "http://www.twse.com.tw/exchangeReport/MI_INDEX?response=json&date={0}&type=ALLBUT0999&_=1502250724849";
         string _otcPricePath = "http://www.tpex.org.tw/web/stock/aftertrading/daily_close_quotes/stk_quote_result.php?l=zh-tw&d={0}&_=1432687154819";
 
-        public WebService webService { get; set; }
+        public readonly WebService webService;
+        public readonly DbService dbService;
 
         public Form1()
         {
             InitializeComponent();
             webService = new WebService();
-            txt_date.Text = DateTime.Now.ToString("yyyy/MM/dd");
+            dbService = new DbService();
+
         }
 
         /// <summary>
@@ -39,17 +43,13 @@ namespace GetClosePrice
         private void btn_download_Click(object sender, EventArgs e)
         {
             // 設定日期
-            var date = DateTime.Parse(txt_date.Text);
-
-            var list = new List<ViewModel>();
-
-            // 市p  
-            var url = string.Format(_tsePricePath, date.ToString("yyyyMMdd"));
-            list.AddRange(webService.GetSiiInfo(url));
-
-            // 櫃p
-            var url2 = string.Format(_otcPricePath, DateHelper.ParseToTaiwanDate(date));
-            list.AddRange(webService.GetOtcInfo(url2));
+            var date = dt_price.Value.Date;
+            var list = GetStockPrice(date);
+            if (list == null)
+            {
+                MessageBox.Show("此日期無資料");
+                return;
+            }
 
             // 匯出Excel
             SaveFileDialog save = new SaveFileDialog();
@@ -60,12 +60,108 @@ namespace GetClosePrice
             FileInfo newFile = new FileInfo(save.FileName);
             ExcelHelper.ExportToExcel(list, newFile);
             MessageBox.Show("下載成功");
+       
         }
 
 
-        private void button1_Click(object sender, EventArgs e)
+        /// <summary>
+        /// 更新三大法人
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void btn_3big_Click(object sender, EventArgs e)
         {
+            // 設定日期
+            var date = dt_price.Value.Date;
 
+            // 上市三大data
+            var path = "http://www.tse.com.tw/fund/T86?response=json&date={0}&selectType=ALLBUT0999&_=1503041070775";
+            var url = string.Format(path, date.ToString("yyyyMMdd"));
+            webService.GetSii3BigInfo(url);
+
+            // 上櫃三大data
+            var path2 = "http://www.tpex.org.tw/web/stock/3insti/daily_trade/3itrade_hedge_result.php?l=zh-tw&se=EW&t=D&d={0}&_=1503039637105";
+            var url2 = string.Format(path2, DateHelper.ParseToTaiwanDate(date));
+            webService.GetOtc3BigInfo(url2);
+
+            // TODO mapping
+
+            // TODO 更新資料庫
         }
+
+        /// <summary>
+        /// 資料庫更新price
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void btn_update_price_Click(object sender, EventArgs e)
+        {
+            // 設定日期
+            var begin = dt_begin.Value.Date;
+            var end = dt_end.Value.Date;
+
+            var list = new List<Price>();
+            var count = 0;
+            foreach (var day in DateHelper.EachDay(begin, end))
+            {
+                this.Message("導出數據: " + day.ToString("yyyy/MM/dd") + "...");
+                var temp = GetStockPrice(day);
+                if (temp == null) continue;
+
+                this.Message("更新資料庫:" + day.ToString("yyyy/MM/dd") + "...");
+                var models = MappingPrice(day, temp);
+                count += dbService.InsertPrice(models);
+            }
+
+            //進度走完關閉進度條
+            this.Message("執行完畢!");
+            MessageBox.Show(string.Format("更新成功 : 共 {0} 筆", count));
+        }
+
+        #region 私人方法
+        /// <summary>
+        /// 取得上市櫃 Price
+        /// </summary>
+        /// <param name="date"></param>
+        /// <returns></returns>
+        private List<ViewModel> GetStockPrice(DateTime date)
+        {
+            var list = new List<ViewModel>();
+
+            try
+            {
+                // 市p  
+                var url = string.Format(_tsePricePath, date.ToString("yyyyMMdd"));
+                list.AddRange(webService.GetSiiInfo(url));
+
+                // 櫃p
+                var url2 = string.Format(_otcPricePath, DateHelper.ParseToTaiwanDate(date));
+                list.AddRange(webService.GetOtcInfo(url2));
+                return list;
+            }
+            catch (Exception)
+            {
+                return null;
+            }
+        }
+
+        private void Message(string text)
+        {
+            lbl_progress.Text = text;
+            Application.DoEvents();
+        }
+
+        private static List<Price> MappingPrice(DateTime day, List<ViewModel> temp)
+        {
+            var config = new MapperConfiguration(cfg => cfg.CreateMap<ViewModel, Price>()
+                .ForMember(c => c.Date, opt => opt.MapFrom(src => day))
+                .ForMember(c => c.OpenPrice, opt => opt.MapFrom(src => src.Open))
+                .ForMember(c => c.ClosePrice, opt => opt.MapFrom(src => src.Close))
+                );
+            var mapper = config.CreateMapper();
+            var models = mapper.Map<List<Price>>(temp);
+            return models;
+        }
+        #endregion
     }
 }
