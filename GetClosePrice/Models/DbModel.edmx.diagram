@@ -6,6 +6,7 @@
     <edmx:Diagrams>
       <Diagram DiagramId="51503a4494da4a94970015091562b1a2" Name="Diagram1">
         <EntityTypeShape EntityType="StockModel.Price" Width="1.5" PointX="0.75" PointY="0.75" />
+        <EntityTypeShape EntityType="StockModel.ThreeBigBuySell" Width="1.5" PointX="3.375" PointY="0.75" />
       </Diagram>
     </edmx:Diagrams>
   </edmx:Designer>

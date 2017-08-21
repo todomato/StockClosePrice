@@ -19,8 +19,33 @@
           <Property Name="Low" Type="float" Nullable="false" />
           <Property Name="Volumn" Type="int" Nullable="false" />
         </EntityType>
+        <EntityType Name="ThreeBigBuySell">
+          <Key>
+            <PropertyRef Name="Date" />
+            <PropertyRef Name="Code" />
+          </Key>
+          <Property Name="Date" Type="datetime" Nullable="false" />
+          <Property Name="Code" Type="int" Nullable="false" />
+          <Property Name="Type" Type="varchar" MaxLength="3" Nullable="false" />
+          <Property Name="Name" Type="nvarchar" MaxLength="100" Nullable="false" />
+          <Property Name="A_Buy" Type="int" Nullable="false" />
+          <Property Name="A_Sell" Type="int" Nullable="false" />
+          <Property Name="A_Total" Type="int" Nullable="false" />
+          <Property Name="B_Buy" Type="int" Nullable="false" />
+          <Property Name="B_Sell" Type="int" Nullable="false" />
+          <Property Name="B_Total" Type="int" Nullable="false" />
+          <Property Name="C_Buy" Type="int" Nullable="false" />
+          <Property Name="C_Sell" Type="int" Nullable="false" />
+          <Property Name="C_Total" Type="int" Nullable="false" />
+          <Property Name="D_Buy" Type="int" Nullable="false" />
+          <Property Name="D_Sell" Type="int" Nullable="false" />
+          <Property Name="D_Total" Type="int" Nullable="false" />
+          <Property Name="CD_Total" Type="int" Nullable="false" />
+          <Property Name="Daily_Total" Type="int" Nullable="false" />
+        </EntityType>
         <EntityContainer Name="StockModelStoreContainer">
           <EntitySet Name="Price" EntityType="Self.Price" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="ThreeBigBuySell" EntityType="Self.ThreeBigBuySell" Schema="dbo" store:Type="Tables" />
         </EntityContainer>
       </Schema></edmx:StorageModels>
     <!-- CSDL content -->
@@ -28,6 +53,7 @@
       <Schema Namespace="StockModel" Alias="Self" annotation:UseStrongSpatialTypes="false" xmlns:annotation="http://schemas.microsoft.com/ado/2009/02/edm/annotation" xmlns:customannotation="http://schemas.microsoft.com/ado/2013/11/edm/customannotation" xmlns="http://schemas.microsoft.com/ado/2009/11/edm">
         <EntityContainer Name="StockEntities" annotation:LazyLoadingEnabled="true">
           <EntitySet Name="Price" EntityType="StockModel.Price" />
+          <EntitySet Name="ThreeBigBuySell" EntityType="StockModel.ThreeBigBuySell" />
         </EntityContainer>
         <EntityType Name="Price">
           <Key>
@@ -43,6 +69,30 @@
           <Property Name="Low" Type="Double" Nullable="false" />
           <Property Name="Volumn" Type="Int32" Nullable="false" />
         </EntityType>
+        <EntityType Name="ThreeBigBuySell">
+          <Key>
+            <PropertyRef Name="Date" />
+            <PropertyRef Name="Code" />
+          </Key>
+          <Property Name="Date" Type="DateTime" Nullable="false" Precision="3" />
+          <Property Name="Code" Type="Int32" Nullable="false" />
+          <Property Name="Name" Type="String" Nullable="false" MaxLength="100" FixedLength="false" Unicode="true" />
+          <Property Name="A_Buy" Type="Int32" Nullable="false" />
+          <Property Name="A_Sell" Type="Int32" Nullable="false" />
+          <Property Name="A_Total" Type="Int32" Nullable="false" />
+          <Property Name="B_Buy" Type="Int32" Nullable="false" />
+          <Property Name="B_Sell" Type="Int32" Nullable="false" />
+          <Property Name="B_Total" Type="Int32" Nullable="false" />
+          <Property Name="C_Buy" Type="Int32" Nullable="false" />
+          <Property Name="C_Sell" Type="Int32" Nullable="false" />
+          <Property Name="C_Total" Type="Int32" Nullable="false" />
+          <Property Name="D_Buy" Type="Int32" Nullable="false" />
+          <Property Name="D_Sell" Type="Int32" Nullable="false" />
+          <Property Name="D_Total" Type="Int32" Nullable="false" />
+          <Property Name="CD_Total" Type="Int32" Nullable="false" />
+          <Property Name="Daily_Total" Type="Int32" Nullable="false" />
+          <Property Name="Type" Type="String" Nullable="false" MaxLength="3" FixedLength="false" Unicode="false" />
+        </EntityType>
       </Schema>
     </edmx:ConceptualModels>
     <!-- C-S mapping content -->
@@ -57,6 +107,30 @@
                 <ScalarProperty Name="High" ColumnName="High" />
                 <ScalarProperty Name="ClosePrice" ColumnName="ClosePrice" />
                 <ScalarProperty Name="OpenPrice" ColumnName="OpenPrice" />
+                <ScalarProperty Name="Name" ColumnName="Name" />
+                <ScalarProperty Name="Code" ColumnName="Code" />
+                <ScalarProperty Name="Date" ColumnName="Date" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="ThreeBigBuySell">
+            <EntityTypeMapping TypeName="StockModel.ThreeBigBuySell">
+              <MappingFragment StoreEntitySet="ThreeBigBuySell">
+                <ScalarProperty Name="Type" ColumnName="Type" />
+                <ScalarProperty Name="Daily_Total" ColumnName="Daily_Total" />
+                <ScalarProperty Name="CD_Total" ColumnName="CD_Total" />
+                <ScalarProperty Name="D_Total" ColumnName="D_Total" />
+                <ScalarProperty Name="D_Sell" ColumnName="D_Sell" />
+                <ScalarProperty Name="D_Buy" ColumnName="D_Buy" />
+                <ScalarProperty Name="C_Total" ColumnName="C_Total" />
+                <ScalarProperty Name="C_Sell" ColumnName="C_Sell" />
+                <ScalarProperty Name="C_Buy" ColumnName="C_Buy" />
+                <ScalarProperty Name="B_Total" ColumnName="B_Total" />
+                <ScalarProperty Name="B_Sell" ColumnName="B_Sell" />
+                <ScalarProperty Name="B_Buy" ColumnName="B_Buy" />
+                <ScalarProperty Name="A_Total" ColumnName="A_Total" />
+                <ScalarProperty Name="A_Sell" ColumnName="A_Sell" />
+                <ScalarProperty Name="A_Buy" ColumnName="A_Buy" />
                 <ScalarProperty Name="Name" ColumnName="Name" />
                 <ScalarProperty Name="Code" ColumnName="Code" />
                 <ScalarProperty Name="Date" ColumnName="Date" />

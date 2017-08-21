@@ -70,22 +70,22 @@ namespace GetClosePrice.Service
         /// </summary>
         /// <param name="url"></param>
         /// <returns></returns>
-        public List<ViewModel> GetSii3BigInfo(string url)
+        public List<ThreeBigViewModel> GetSii3BigInfo(string url)
         {
-            var list = new List<ViewModel>();
+            var list = new List<ThreeBigViewModel>();
             using (WebClient wc = new WebClient())
             {
                 wc.Encoding = Encoding.UTF8;
                 var json = wc.DownloadString(url);
-                // var jsonData = JObject.Parse(json);
+                if (json.Contains("很抱歉")) return null;
                 var ssi = JsonConvert.DeserializeObject<sii3BigModel>(json);
 
-                //foreach (var item in ssi.data)
-                //{
-                //    if (item[0].Length != 4) continue;
-                //    var temp = new ViewModel(item, "sii");
-                //    list.Add(temp);
-                //}
+                foreach (var item in ssi.data)
+                {
+                    if (item[0].Length != 4) continue;
+                    var temp = new ThreeBigViewModel(item, "sii");
+                    list.Add(temp);
+                }
             }
             return list;
         }
@@ -95,23 +95,23 @@ namespace GetClosePrice.Service
         /// </summary>
         /// <param name="url2"></param>
         /// <returns></returns>
-        public List<ViewModel> GetOtc3BigInfo(string url2)
+        public List<ThreeBigViewModel> GetOtc3BigInfo(string url2)
         {
-            var list = new List<ViewModel>();
+            var list = new List<ThreeBigViewModel>();
 
             using (WebClient wc = new WebClient())
             {
                 wc.Encoding = Encoding.UTF8;
                 var json = wc.DownloadString(url2);
-                // var jsonData = JObject.Parse(json);
+                if (json.Contains("很抱歉")) return null;
                 var otc = JsonConvert.DeserializeObject<otc3BigModel>(json);
 
-                //foreach (var item in otc.aaData)
-                //{
-                //    if (item[0].Length != 4) continue;
-                //    var temp = new ViewModel(item, "otc");
-                //    list.Add(temp);
-                //}
+                foreach (var item in otc.aaData)
+                {
+                    if (item[0].Trim().Length != 4) continue;
+                    var temp = new ThreeBigViewModel(item, "otc");
+                    list.Add(temp);
+                }
             }
             return list;
         }

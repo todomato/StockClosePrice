@@ -23,7 +23,8 @@ namespace GetClosePrice
     {
         string _tsePricePath = "http://www.twse.com.tw/exchangeReport/MI_INDEX?response=json&date={0}&type=ALLBUT0999&_=1502250724849";
         string _otcPricePath = "http://www.tpex.org.tw/web/stock/aftertrading/daily_close_quotes/stk_quote_result.php?l=zh-tw&d={0}&_=1432687154819";
-
+        string _tscBuySellPath = "http://www.tse.com.tw/fund/T86?response=json&date={0}&selectType=ALLBUT0999&_=1503041070775";
+        string _otcBuySellPath = "http://www.tpex.org.tw/web/stock/3insti/daily_trade/3itrade_hedge_result.php?l=zh-tw&se=EW&t=D&d={0}&_=1503039637105";
         public readonly WebService webService;
         public readonly DbService dbService;
 
@@ -72,21 +73,24 @@ namespace GetClosePrice
         private void btn_3big_Click(object sender, EventArgs e)
         {
             // 設定日期
-            var date = dt_price.Value.Date;
+            var begin = dt_begin.Value.Date;
+            var end = dt_end.Value.Date;
 
-            // 上市三大data
-            var path = "http://www.tse.com.tw/fund/T86?response=json&date={0}&selectType=ALLBUT0999&_=1503041070775";
-            var url = string.Format(path, date.ToString("yyyyMMdd"));
-            webService.GetSii3BigInfo(url);
+            var count = 0;
+            foreach (var day in DateHelper.EachDay(begin, end))
+            {
+                this.Message("導出法人數據: " + day.ToString("yyyy/MM/dd") + "...");
+                var temp = Get3BigBuySell(day);
+                if (temp == null) continue;
 
-            // 上櫃三大data
-            var path2 = "http://www.tpex.org.tw/web/stock/3insti/daily_trade/3itrade_hedge_result.php?l=zh-tw&se=EW&t=D&d={0}&_=1503039637105";
-            var url2 = string.Format(path2, DateHelper.ParseToTaiwanDate(date));
-            webService.GetOtc3BigInfo(url2);
+                this.Message("更新資料庫:" + day.ToString("yyyy/MM/dd") + "...");
+                var models = Mapping3Big(day, temp);
+                count += dbService.Insert3BigBuySell(models);
+            }
 
-            // TODO mapping
-
-            // TODO 更新資料庫
+            //進度走完關閉進度條
+            this.Message("執行完畢!");
+            MessageBox.Show(string.Format("更新成功 : 共 {0} 筆", count));
         }
 
         /// <summary>
@@ -100,7 +104,6 @@ namespace GetClosePrice
             var begin = dt_begin.Value.Date;
             var end = dt_end.Value.Date;
 
-            var list = new List<Price>();
             var count = 0;
             foreach (var day in DateHelper.EachDay(begin, end))
             {
@@ -145,6 +148,32 @@ namespace GetClosePrice
             }
         }
 
+        /// <summary>
+        /// 取得上市櫃 三大
+        /// </summary>
+        /// <param name="date"></param>
+        /// <returns></returns>
+        private List<ThreeBigViewModel> Get3BigBuySell(DateTime date)
+        {
+            var list = new List<ThreeBigViewModel>();
+
+            try
+            {
+                // 上市三大data
+                var url = string.Format(_tscBuySellPath, date.ToString("yyyyMMdd"));
+                list.AddRange(webService.GetSii3BigInfo(url));
+
+                // 上櫃三大data
+                var url2 = string.Format(_otcBuySellPath, DateHelper.ParseToTaiwanDate(date));
+                list.AddRange(webService.GetOtc3BigInfo(url2));
+                return list;
+            }
+            catch (Exception)
+            {
+                return null;
+            }
+        }
+
         private void Message(string text)
         {
             lbl_progress.Text = text;
@@ -160,6 +189,16 @@ namespace GetClosePrice
                 );
             var mapper = config.CreateMapper();
             var models = mapper.Map<List<Price>>(temp);
+            return models;
+        }
+
+        private static List<ThreeBigBuySell> Mapping3Big(DateTime day, List<ThreeBigViewModel> temp)
+        {
+            var config = new MapperConfiguration(cfg => cfg.CreateMap<ThreeBigViewModel, ThreeBigBuySell>()
+                .ForMember(c => c.Date, opt => opt.MapFrom(src => day))
+                );
+            var mapper = config.CreateMapper();
+            var models = mapper.Map<List<ThreeBigBuySell>>(temp);
             return models;
         }
         #endregion
