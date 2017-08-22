@@ -38,6 +38,7 @@
             this.dt_begin = new System.Windows.Forms.DateTimePicker();
             this.label3 = new System.Windows.Forms.Label();
             this.dt_end = new System.Windows.Forms.DateTimePicker();
+            this.btn_autoUpdate = new System.Windows.Forms.Button();
             this.SuspendLayout();
             // 
             // btn_download
@@ -52,7 +53,7 @@
             // 
             // btn_3big
             // 
-            this.btn_3big.Location = new System.Drawing.Point(369, 63);
+            this.btn_3big.Location = new System.Drawing.Point(404, 92);
             this.btn_3big.Name = "btn_3big";
             this.btn_3big.Size = new System.Drawing.Size(75, 23);
             this.btn_3big.TabIndex = 2;
@@ -62,7 +63,7 @@
             // 
             // button1
             // 
-            this.button1.Location = new System.Drawing.Point(288, 63);
+            this.button1.Location = new System.Drawing.Point(404, 63);
             this.button1.Name = "button1";
             this.button1.Size = new System.Drawing.Size(75, 23);
             this.button1.TabIndex = 3;
@@ -130,11 +131,22 @@
             this.dt_end.Size = new System.Drawing.Size(92, 22);
             this.dt_end.TabIndex = 10;
             // 
+            // btn_autoUpdate
+            // 
+            this.btn_autoUpdate.Location = new System.Drawing.Point(290, 63);
+            this.btn_autoUpdate.Name = "btn_autoUpdate";
+            this.btn_autoUpdate.Size = new System.Drawing.Size(75, 23);
+            this.btn_autoUpdate.TabIndex = 11;
+            this.btn_autoUpdate.Text = "自動更新";
+            this.btn_autoUpdate.UseVisualStyleBackColor = true;
+            this.btn_autoUpdate.Click += new System.EventHandler(this.btn_autoUpdate_Click);
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(523, 261);
+            this.Controls.Add(this.btn_autoUpdate);
             this.Controls.Add(this.dt_end);
             this.Controls.Add(this.label3);
             this.Controls.Add(this.dt_begin);
@@ -164,6 +176,7 @@
         private System.Windows.Forms.DateTimePicker dt_begin;
         private System.Windows.Forms.Label label3;
         private System.Windows.Forms.DateTimePicker dt_end;
+        private System.Windows.Forms.Button btn_autoUpdate;
     }
 }
 

@@ -18,6 +18,8 @@
           <Property Name="High" Type="float" Nullable="false" />
           <Property Name="Low" Type="float" Nullable="false" />
           <Property Name="Volumn" Type="int" Nullable="false" />
+          <Property Name="Amount" Type="int" />
+          <Property Name="Count" Type="int" />
         </EntityType>
         <EntityType Name="ThreeBigBuySell">
           <Key>
@@ -68,6 +70,8 @@
           <Property Name="High" Type="Double" Nullable="false" />
           <Property Name="Low" Type="Double" Nullable="false" />
           <Property Name="Volumn" Type="Int32" Nullable="false" />
+          <Property Name="Amount" Type="Int32" />
+          <Property Name="Count" Type="Int32" />
         </EntityType>
         <EntityType Name="ThreeBigBuySell">
           <Key>
@@ -102,6 +106,8 @@
           <EntitySetMapping Name="Price">
             <EntityTypeMapping TypeName="StockModel.Price">
               <MappingFragment StoreEntitySet="Price">
+                <ScalarProperty Name="Count" ColumnName="Count" />
+                <ScalarProperty Name="Amount" ColumnName="Amount" />
                 <ScalarProperty Name="Volumn" ColumnName="Volumn" />
                 <ScalarProperty Name="Low" ColumnName="Low" />
                 <ScalarProperty Name="High" ColumnName="High" />

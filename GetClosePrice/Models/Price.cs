@@ -22,5 +22,7 @@ namespace GetClosePrice.Models
         public double High { get; set; }
         public double Low { get; set; }
         public int Volumn { get; set; }
+        public Nullable<int> Amount { get; set; }
+        public Nullable<int> Count { get; set; }
     }
 }

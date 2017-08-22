@@ -65,6 +65,18 @@ namespace GetClosePrice
         }
 
 
+        private void btn_autoUpdate_Click(object sender, EventArgs e)
+        {
+            // 判斷更新時間區間
+            dt_begin.Value = dbService.GetLastUpdateTime().AddDays(1);
+
+            // 下午四點後才更新今日
+            dt_end.Value = (DateTime.Now.Hour >= 16) ? DateTime.Now : DateTime.Now.AddDays(-1);
+            
+            btn_3big_Click(null, null);
+            btn_update_price_Click(null, null);
+        }
+
         /// <summary>
         /// 更新三大法人
         /// </summary>
@@ -202,5 +214,7 @@ namespace GetClosePrice
             return models;
         }
         #endregion
+
+     
     }
 }
