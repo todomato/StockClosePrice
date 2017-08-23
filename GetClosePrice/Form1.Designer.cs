@@ -39,6 +39,7 @@
             this.label3 = new System.Windows.Forms.Label();
             this.dt_end = new System.Windows.Forms.DateTimePicker();
             this.btn_autoUpdate = new System.Windows.Forms.Button();
+            this.button2 = new System.Windows.Forms.Button();
             this.SuspendLayout();
             // 
             // btn_download
@@ -141,11 +142,22 @@
             this.btn_autoUpdate.UseVisualStyleBackColor = true;
             this.btn_autoUpdate.Click += new System.EventHandler(this.btn_autoUpdate_Click);
             // 
+            // button2
+            // 
+            this.button2.Location = new System.Drawing.Point(403, 121);
+            this.button2.Name = "button2";
+            this.button2.Size = new System.Drawing.Size(93, 23);
+            this.button2.TabIndex = 12;
+            this.button2.Text = "更新法人持股";
+            this.button2.UseVisualStyleBackColor = true;
+            this.button2.Click += new System.EventHandler(this.btn_insert_foreignown_Click);
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(523, 261);
+            this.Controls.Add(this.button2);
             this.Controls.Add(this.btn_autoUpdate);
             this.Controls.Add(this.dt_end);
             this.Controls.Add(this.label3);
@@ -177,6 +189,7 @@
         private System.Windows.Forms.Label label3;
         private System.Windows.Forms.DateTimePicker dt_end;
         private System.Windows.Forms.Button btn_autoUpdate;
+        private System.Windows.Forms.Button button2;
     }
 }
 

@@ -90,6 +90,9 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>DbModel.edmx</DependentUpon>
     </Compile>
+    <Compile Include="Models\ForeignOwn.cs">
+      <DependentUpon>DbModel.tt</DependentUpon>
+    </Compile>
     <Compile Include="Models\otc3BigModel.cs" />
     <Compile Include="Models\Price.cs">
       <DependentUpon>DbModel.tt</DependentUpon>
@@ -98,6 +101,7 @@
     <Compile Include="Models\ThreeBigBuySell.cs">
       <DependentUpon>DbModel.tt</DependentUpon>
     </Compile>
+    <Compile Include="Models\ForeignOwnViewModel.cs" />
     <Compile Include="Models\ThreeBigViewModel.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -105,7 +109,7 @@
     <Compile Include="Service\DbService.cs" />
     <Compile Include="Service\WebService.cs" />
     <Compile Include="Models\siiModel.cs" />
-    <Compile Include="Models\ViewModel.cs" />
+    <Compile Include="Models\PriceViewModel.cs" />
     <EmbeddedResource Include="Form1.resx">
       <DependentUpon>Form1.cs</DependentUpon>
     </EmbeddedResource>

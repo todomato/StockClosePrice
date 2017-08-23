@@ -17,9 +17,9 @@ namespace GetClosePrice.Service
         /// </summary>
         /// <param name="url2"></param>
         /// <returns></returns>
-        public List<ViewModel> GetOtcInfo(string url2)
+        public List<PriceViewModel> GetOtcInfo(string url2)
         {
-            var list = new List<ViewModel>();
+            var list = new List<PriceViewModel>();
 
             using (WebClient wc = new WebClient())
             {
@@ -32,7 +32,7 @@ namespace GetClosePrice.Service
                 foreach (var item in otc.aaData)
                 {
                     if (item[0].Length != 4) continue;
-                    var temp = new ViewModel(item, "otc");
+                    var temp = new PriceViewModel(item, "otc");
                     list.Add(temp);
                 }
             }
@@ -44,9 +44,9 @@ namespace GetClosePrice.Service
         /// </summary>
         /// <param name="url"></param>
         /// <returns></returns>
-        public List<ViewModel> GetSiiInfo(string url)
+        public List<PriceViewModel> GetSiiInfo(string url)
         {
-            var list = new List<ViewModel>();
+            var list = new List<PriceViewModel>();
             using (WebClient wc = new WebClient())
             {
                 wc.Encoding = Encoding.UTF8;
@@ -58,7 +58,7 @@ namespace GetClosePrice.Service
                 foreach (var item in ssi.data5)
                 {
                     if (item[0].Length != 4) continue;
-                    var temp = new ViewModel(item, "sii");
+                    var temp = new PriceViewModel(item, "sii");
                     list.Add(temp);
                 }
             }
@@ -112,6 +112,47 @@ namespace GetClosePrice.Service
                     var temp = new ThreeBigViewModel(item, "otc");
                     list.Add(temp);
                 }
+            }
+            return list;
+        }
+
+        /// <summary>
+        /// 取得sii 法人持股
+        /// </summary>
+        /// <param name="url"></param>
+        /// <returns></returns>
+        public List<ForeignOwnViewModel> GetSiiForeignOwnInfo(string url)
+        {
+            var list = new List<ForeignOwnViewModel>();
+            using (WebClient wc = new WebClient())
+            {
+                wc.Encoding = Encoding.UTF8;
+                var json = wc.DownloadString(url);
+                if (json.Contains("很抱歉")) return null;
+                var ssi = JsonConvert.DeserializeObject<sii3BigModel>(json);
+
+                foreach (var item in ssi.data)
+                {
+                    if (item[0].Length != 4) continue;
+                    var temp = new ForeignOwnViewModel(item, "sii");
+                    list.Add(temp);
+                }
+            }
+            return list;
+        }
+
+        /// <summary>
+        /// 取得otc 法人持股
+        /// </summary>
+        /// <param name="url"></param>
+        /// <returns></returns>
+        public List<ForeignOwnViewModel> GetOtcForeignOwnInfo(string url, DateTime date)
+        {
+            //params : years, months, days, step
+            var list = new List<ForeignOwnViewModel>();
+            using (WebClient wc = new WebClient())
+            {
+              //todo 
             }
             return list;
         }

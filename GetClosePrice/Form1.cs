@@ -25,6 +25,10 @@ namespace GetClosePrice
         string _otcPricePath = "http://www.tpex.org.tw/web/stock/aftertrading/daily_close_quotes/stk_quote_result.php?l=zh-tw&d={0}&_=1432687154819";
         string _tscBuySellPath = "http://www.tse.com.tw/fund/T86?response=json&date={0}&selectType=ALLBUT0999&_=1503041070775";
         string _otcBuySellPath = "http://www.tpex.org.tw/web/stock/3insti/daily_trade/3itrade_hedge_result.php?l=zh-tw&se=EW&t=D&d={0}&_=1503039637105";
+
+        string _tseForeignOwnPath = "http://www.tse.com.tw/fund/MI_QFIIS?response=json&date={0}&selectType=ALLBUT0999&_=1503452481532";
+        string _otcForeignOwnPath = "http://mops.twse.com.tw/server-java/t13sa150_otc";
+
         public readonly WebService webService;
         public readonly DbService dbService;
 
@@ -33,7 +37,8 @@ namespace GetClosePrice
             InitializeComponent();
             webService = new WebService();
             dbService = new DbService();
-
+            dt_begin.Value = (DateTime.Now.Hour >= 16) ? DateTime.Now : DateTime.Now.AddDays(-1);
+            dt_end.Value = (DateTime.Now.Hour >= 16) ? DateTime.Now : DateTime.Now.AddDays(-1);
         }
 
         /// <summary>
@@ -64,7 +69,11 @@ namespace GetClosePrice
        
         }
 
-
+        /// <summary>
+        /// 自動更新股價與買賣超
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void btn_autoUpdate_Click(object sender, EventArgs e)
         {
             // 判斷更新時間區間
@@ -102,8 +111,40 @@ namespace GetClosePrice
 
             //進度走完關閉進度條
             this.Message("執行完畢!");
-            MessageBox.Show(string.Format("更新成功 : 共 {0} 筆", count));
+            MessageBox.Show(string.Format("更新三大法人每日買賣成功 : 共 {0} 筆", count));
         }
+
+        /// <summary>
+        /// 更新法人持股
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void btn_insert_foreignown_Click(object sender, EventArgs e)
+        {
+            // 設定日期
+            var begin = dt_begin.Value.Date;
+            var end = dt_end.Value.Date;
+
+            var count = 0;
+            foreach (var day in DateHelper.EachDay(begin, end))
+            {
+                this.Message("導出法人持股數據: " + day.ToString("yyyy/MM/dd") + "...");
+                var temp = GetForeignOwn(day);
+                if (temp == null) continue;
+
+                this.Message("更新資料庫:" + day.ToString("yyyy/MM/dd") + "...");
+                var models = MappingForeignOwn(day, temp);
+                count += dbService.InsertForeignOwn(models);
+            }
+
+            //進度走完關閉進度條
+            this.Message("執行完畢!");
+            MessageBox.Show(string.Format("更新法人持股成功 : 共 {0} 筆", count));
+        }
+
+   
+
+   
 
         /// <summary>
         /// 資料庫更新price
@@ -130,7 +171,7 @@ namespace GetClosePrice
 
             //進度走完關閉進度條
             this.Message("執行完畢!");
-            MessageBox.Show(string.Format("更新成功 : 共 {0} 筆", count));
+            MessageBox.Show(string.Format("更新股價成功 : 共 {0} 筆", count));
         }
 
         #region 私人方法
@@ -139,9 +180,9 @@ namespace GetClosePrice
         /// </summary>
         /// <param name="date"></param>
         /// <returns></returns>
-        private List<ViewModel> GetStockPrice(DateTime date)
+        private List<PriceViewModel> GetStockPrice(DateTime date)
         {
-            var list = new List<ViewModel>();
+            var list = new List<PriceViewModel>();
 
             try
             {
@@ -186,15 +227,42 @@ namespace GetClosePrice
             }
         }
 
+
+        /// <summary>
+        /// 取得法人持股
+        /// </summary>
+        /// <param name="date"></param>
+        /// <returns></returns>
+        private List<ForeignOwnViewModel> GetForeignOwn(DateTime date)
+        {
+            var list = new List<ForeignOwnViewModel>();
+
+            try
+            {
+                // 上市三大data
+                var url = string.Format(_tseForeignOwnPath, date.ToString("yyyyMMdd"));
+                list.AddRange(webService.GetSiiForeignOwnInfo(url));
+
+                // 上櫃三大data
+                var url2 = _otcForeignOwnPath;
+                list.AddRange(webService.GetOtcForeignOwnInfo(url2, date));
+                return list;
+            }
+            catch (Exception)
+            {
+                return null;
+            }
+        }
+
         private void Message(string text)
         {
             lbl_progress.Text = text;
             Application.DoEvents();
         }
 
-        private static List<Price> MappingPrice(DateTime day, List<ViewModel> temp)
+        private static List<Price> MappingPrice(DateTime day, List<PriceViewModel> temp)
         {
-            var config = new MapperConfiguration(cfg => cfg.CreateMap<ViewModel, Price>()
+            var config = new MapperConfiguration(cfg => cfg.CreateMap<PriceViewModel, Price>()
                 .ForMember(c => c.Date, opt => opt.MapFrom(src => day))
                 .ForMember(c => c.OpenPrice, opt => opt.MapFrom(src => src.Open))
                 .ForMember(c => c.ClosePrice, opt => opt.MapFrom(src => src.Close))
@@ -211,6 +279,16 @@ namespace GetClosePrice
                 );
             var mapper = config.CreateMapper();
             var models = mapper.Map<List<ThreeBigBuySell>>(temp);
+            return models;
+        }
+
+        private static List<ForeignOwn> MappingForeignOwn(DateTime day, List<ForeignOwnViewModel> temp)
+        {
+            var config = new MapperConfiguration(cfg => cfg.CreateMap<ForeignOwnViewModel, ForeignOwn>()
+               .ForMember(c => c.Date, opt => opt.MapFrom(src => day))
+               );
+            var mapper = config.CreateMapper();
+            var models = mapper.Map<List<ForeignOwn>>(temp);
             return models;
         }
         #endregion

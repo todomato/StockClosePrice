@@ -61,5 +61,25 @@ namespace GetClosePrice.Service
                 return result;
             }
         }
+
+        /// <summary>
+        /// 新增法人持股
+        /// </summary>
+        /// <param name="models"></param>
+        /// <returns></returns>
+        internal int InsertForeignOwn(List<ForeignOwn> models)
+        {
+            var count = 0;
+            using (var db = new StockEntities())
+            {
+                // 有相同日期不上傳
+                if (models.Count > 0 && models[0] != null && !db.ForeignOwn.AsEnumerable().Any(c => c.Date == models[0].Date))
+                {
+                    db.ForeignOwn.AddRange(models);
+                    count = db.SaveChanges();
+                }
+            }
+            return count;
+        }
     }
 }

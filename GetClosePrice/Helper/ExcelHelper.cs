@@ -10,7 +10,7 @@ namespace GetClosePrice.Helper
 {
     public class ExcelHelper
     {
-        public static void ExportToExcel(IEnumerable<ViewModel> list, FileInfo targetFile)
+        public static void ExportToExcel(IEnumerable<PriceViewModel> list, FileInfo targetFile)
         {
             using (var excelFile = new ExcelPackage(targetFile))
             {

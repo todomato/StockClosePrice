@@ -6,9 +6,9 @@ using System.Threading.Tasks;
 
 namespace GetClosePrice
 {
-    public class ViewModel
+    public class PriceViewModel
     {
-        public ViewModel(string[] item, string type)
+        public PriceViewModel(string[] item, string type)
         {
             if (type == "sii")
             {
