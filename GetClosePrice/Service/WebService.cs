@@ -6,6 +6,8 @@ using System.Threading.Tasks;
 using System.Net;
 using Newtonsoft.Json;
 using GetClosePrice.Models;
+using System.Collections.Specialized;
+using HtmlAgilityPack;
 
 namespace GetClosePrice.Service
 {
@@ -150,11 +152,51 @@ namespace GetClosePrice.Service
         {
             //params : years, months, days, step
             var list = new List<ForeignOwnViewModel>();
-            using (WebClient wc = new WebClient())
+            var doc = new HtmlAgilityPack.HtmlDocument();
+
+            //下載html
+            using (var myWebClient = new WebClient())
             {
-              //todo 
+
+                byte[] response =
+                    myWebClient.UploadValues(url, new NameValueCollection()
+                    {
+                        { "years", date.Year.ToString() },
+                        { "months", date.Month.ToString("00") },
+                        { "days", date.Day.ToString("00") },
+                        { "step", "2" }
+                    });
+
+                string page = System.Text.Encoding.GetEncoding("Big5").GetString(response);
+                doc.LoadHtml(page);
             }
+
+            //解析html
+            string xpathTemplate = "/html/body/center/table[1]/tr[{0}]/td";
+            try
+            {
+                for (int i = 3; i < 900; i++)
+                {
+                    HtmlNodeCollection nodes = doc.DocumentNode.SelectNodes(string.Format(xpathTemplate, i));
+                    if (nodes != null)
+                    {
+                        var temp = new ForeignOwnViewModel()
+                        {
+                            Code = int.Parse(nodes[0].InnerText.Trim()),            //Code
+                            A_Own = (long)float.Parse(nodes[4].InnerText.Trim()),   //持股數
+                            A_OwnP = double.Parse(nodes[6].InnerText.Trim().Replace("&nbsp;",""))        //持股比
+                        };
+                        list.Add(temp);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+
             return list;
         }
+      
     }
 }

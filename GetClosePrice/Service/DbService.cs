@@ -57,7 +57,7 @@ namespace GetClosePrice.Service
         {
             using (var db = new StockEntities())
             {
-                var result = db.ThreeBigBuySell.Where(c => c.Code == 50).OrderByDescending(c => c.Date).Take(1).Select(c => c.Date).Single();
+                var result = db.ForeignOwn.Where(c => c.Code == 50).OrderByDescending(c => c.Date).Take(1).Select(c => c.Date).Single();
                 return result;
             }
         }

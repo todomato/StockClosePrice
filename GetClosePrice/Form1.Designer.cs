@@ -40,6 +40,7 @@
             this.dt_end = new System.Windows.Forms.DateTimePicker();
             this.btn_autoUpdate = new System.Windows.Forms.Button();
             this.button2 = new System.Windows.Forms.Button();
+            this.btn_today = new System.Windows.Forms.Button();
             this.SuspendLayout();
             // 
             // btn_download
@@ -138,7 +139,7 @@
             this.btn_autoUpdate.Name = "btn_autoUpdate";
             this.btn_autoUpdate.Size = new System.Drawing.Size(75, 23);
             this.btn_autoUpdate.TabIndex = 11;
-            this.btn_autoUpdate.Text = "自動更新";
+            this.btn_autoUpdate.Text = "一鍵更新";
             this.btn_autoUpdate.UseVisualStyleBackColor = true;
             this.btn_autoUpdate.Click += new System.EventHandler(this.btn_autoUpdate_Click);
             // 
@@ -152,11 +153,22 @@
             this.button2.UseVisualStyleBackColor = true;
             this.button2.Click += new System.EventHandler(this.btn_insert_foreignown_Click);
             // 
+            // btn_today
+            // 
+            this.btn_today.Location = new System.Drawing.Point(241, 10);
+            this.btn_today.Name = "btn_today";
+            this.btn_today.Size = new System.Drawing.Size(41, 23);
+            this.btn_today.TabIndex = 13;
+            this.btn_today.Text = "今日";
+            this.btn_today.UseVisualStyleBackColor = true;
+            this.btn_today.Click += new System.EventHandler(this.btn_today_Click);
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(523, 261);
+            this.Controls.Add(this.btn_today);
             this.Controls.Add(this.button2);
             this.Controls.Add(this.btn_autoUpdate);
             this.Controls.Add(this.dt_end);
@@ -190,6 +202,7 @@
         private System.Windows.Forms.DateTimePicker dt_end;
         private System.Windows.Forms.Button btn_autoUpdate;
         private System.Windows.Forms.Button button2;
+        private System.Windows.Forms.Button btn_today;
     }
 }
 

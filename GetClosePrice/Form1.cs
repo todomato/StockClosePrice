@@ -28,7 +28,7 @@ namespace GetClosePrice
 
         string _tseForeignOwnPath = "http://www.tse.com.tw/fund/MI_QFIIS?response=json&date={0}&selectType=ALLBUT0999&_=1503452481532";
         string _otcForeignOwnPath = "http://mops.twse.com.tw/server-java/t13sa150_otc";
-
+        string _alertMessage = "";
         public readonly WebService webService;
         public readonly DbService dbService;
 
@@ -39,6 +39,25 @@ namespace GetClosePrice
             dbService = new DbService();
             dt_begin.Value = (DateTime.Now.Hour >= 16) ? DateTime.Now : DateTime.Now.AddDays(-1);
             dt_end.Value = (DateTime.Now.Hour >= 16) ? DateTime.Now : DateTime.Now.AddDays(-1);
+        }
+
+        /// <summary>
+        /// 一鍵更新(股價、買賣超、持股)
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void btn_autoUpdate_Click(object sender, EventArgs e)
+        {
+            _alertMessage = "";
+            // 判斷更新時間區間 (以外資持股table為主,因為更新時間最晚)
+            dt_begin.Value = dbService.GetLastUpdateTime().AddDays(1);
+
+            // 下午四點後才更新今日
+            dt_end.Value = (DateTime.Now.Hour >= 16) ? DateTime.Now : DateTime.Now.AddDays(-1);
+
+            btn_3big_Click(null, null);
+            btn_update_price_Click(null, null);
+            btn_insert_foreignown_Click(null, null);
         }
 
         /// <summary>
@@ -70,29 +89,14 @@ namespace GetClosePrice
         }
 
         /// <summary>
-        /// 自動更新股價與買賣超
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
-        private void btn_autoUpdate_Click(object sender, EventArgs e)
-        {
-            // 判斷更新時間區間
-            dt_begin.Value = dbService.GetLastUpdateTime().AddDays(1);
-
-            // 下午四點後才更新今日
-            dt_end.Value = (DateTime.Now.Hour >= 16) ? DateTime.Now : DateTime.Now.AddDays(-1);
-            
-            btn_3big_Click(null, null);
-            btn_update_price_Click(null, null);
-        }
-
-        /// <summary>
         /// 更新三大法人
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
         private void btn_3big_Click(object sender, EventArgs e)
         {
+            if (sender != null) _alertMessage = "";
+
             // 設定日期
             var begin = dt_begin.Value.Date;
             var end = dt_end.Value.Date;
@@ -109,10 +113,14 @@ namespace GetClosePrice
                 count += dbService.Insert3BigBuySell(models);
             }
 
-            //進度走完關閉進度條
-            this.Message("執行完畢!");
-            MessageBox.Show(string.Format("更新三大法人每日買賣成功 : 共 {0} 筆", count));
+            this.Message("執行完畢!", string.Format("更新三大法人每日買賣成功 : 共 {0} 筆", count));
+            if (sender != null)
+            {
+                MessageBox.Show(_alertMessage);
+            }
         }
+
+      
 
         /// <summary>
         /// 更新法人持股
@@ -121,6 +129,8 @@ namespace GetClosePrice
         /// <param name="e"></param>
         private void btn_insert_foreignown_Click(object sender, EventArgs e)
         {
+            if (sender != null) _alertMessage = "";
+
             // 設定日期
             var begin = dt_begin.Value.Date;
             var end = dt_end.Value.Date;
@@ -138,13 +148,10 @@ namespace GetClosePrice
             }
 
             //進度走完關閉進度條
-            this.Message("執行完畢!");
-            MessageBox.Show(string.Format("更新法人持股成功 : 共 {0} 筆", count));
+            this.Message("執行完畢!", string.Format("更新法人持股成功 : 共 {0} 筆", count));
+            MessageBox.Show(_alertMessage);
         }
 
-   
-
-   
 
         /// <summary>
         /// 資料庫更新price
@@ -153,6 +160,8 @@ namespace GetClosePrice
         /// <param name="e"></param>
         private void btn_update_price_Click(object sender, EventArgs e)
         {
+            if (sender != null) _alertMessage = "";
+
             // 設定日期
             var begin = dt_begin.Value.Date;
             var end = dt_end.Value.Date;
@@ -169,9 +178,11 @@ namespace GetClosePrice
                 count += dbService.InsertPrice(models);
             }
 
-            //進度走完關閉進度條
-            this.Message("執行完畢!");
-            MessageBox.Show(string.Format("更新股價成功 : 共 {0} 筆", count));
+            this.Message("執行完畢!", string.Format("更新股價成功 : 共 {0} 筆", count));
+            if (sender != null)
+            {
+                MessageBox.Show(_alertMessage);
+            }
         }
 
         #region 私人方法
@@ -260,6 +271,12 @@ namespace GetClosePrice
             Application.DoEvents();
         }
 
+        private void Message(string text, string alertMessage)
+        {
+            Message(text);
+            _alertMessage += alertMessage;
+        }
+
         private static List<Price> MappingPrice(DateTime day, List<PriceViewModel> temp)
         {
             var config = new MapperConfiguration(cfg => cfg.CreateMap<PriceViewModel, Price>()
@@ -293,6 +310,10 @@ namespace GetClosePrice
         }
         #endregion
 
-     
+        private void btn_today_Click(object sender, EventArgs e)
+        {
+            dt_begin.Value = DateTime.Now;
+            dt_end.Value = DateTime.Now;
+        }
     }
 }
