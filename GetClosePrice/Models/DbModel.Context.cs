@@ -25,8 +25,8 @@ namespace GetClosePrice.Models
             throw new UnintentionalCodeFirstException();
         }
     
-        public virtual DbSet<Price> Price { get; set; }
         public virtual DbSet<ThreeBigBuySell> ThreeBigBuySell { get; set; }
         public virtual DbSet<ForeignOwn> ForeignOwn { get; set; }
+        public virtual DbSet<Price> Price { get; set; }
     }
 }

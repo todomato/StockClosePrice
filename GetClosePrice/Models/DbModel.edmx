@@ -28,7 +28,7 @@
           <Property Name="High" Type="float" Nullable="false" />
           <Property Name="Low" Type="float" Nullable="false" />
           <Property Name="Volumn" Type="int" Nullable="false" />
-          <Property Name="Amount" Type="int" />
+          <Property Name="Amount" Type="bigint" />
           <Property Name="Count" Type="int" />
         </EntityType>
         <EntityType Name="ThreeBigBuySell">
@@ -65,26 +65,10 @@
     <edmx:ConceptualModels>
       <Schema Namespace="StockModel" Alias="Self" annotation:UseStrongSpatialTypes="false" xmlns:annotation="http://schemas.microsoft.com/ado/2009/02/edm/annotation" xmlns:customannotation="http://schemas.microsoft.com/ado/2013/11/edm/customannotation" xmlns="http://schemas.microsoft.com/ado/2009/11/edm">
         <EntityContainer Name="StockEntities" annotation:LazyLoadingEnabled="true">
-          <EntitySet Name="Price" EntityType="StockModel.Price" />
           <EntitySet Name="ThreeBigBuySell" EntityType="StockModel.ThreeBigBuySell" />
           <EntitySet Name="ForeignOwn" EntityType="StockModel.ForeignOwn" />
+          <EntitySet Name="Price" EntityType="StockModel.Price" />
         </EntityContainer>
-        <EntityType Name="Price">
-          <Key>
-            <PropertyRef Name="Date" />
-            <PropertyRef Name="Code" />
-          </Key>
-          <Property Name="Date" Type="DateTime" Nullable="false" Precision="3" />
-          <Property Name="Code" Type="Int32" Nullable="false" />
-          <Property Name="Name" Type="String" Nullable="false" MaxLength="100" FixedLength="false" Unicode="true" />
-          <Property Name="OpenPrice" Type="Double" Nullable="false" />
-          <Property Name="ClosePrice" Type="Double" Nullable="false" />
-          <Property Name="High" Type="Double" Nullable="false" />
-          <Property Name="Low" Type="Double" Nullable="false" />
-          <Property Name="Volumn" Type="Int32" Nullable="false" />
-          <Property Name="Amount" Type="Int32" />
-          <Property Name="Count" Type="Int32" />
-        </EntityType>
         <EntityType Name="ThreeBigBuySell">
           <Key>
             <PropertyRef Name="Date" />
@@ -119,28 +103,28 @@
           <Property Name="A_Own" Type="Int64" Nullable="false" />
           <Property Name="A_OwnP" Type="Double" Nullable="false" />
         </EntityType>
+        <EntityType Name="Price">
+          <Key>
+            <PropertyRef Name="Date" />
+            <PropertyRef Name="Code" />
+          </Key>
+          <Property Name="Date" Type="DateTime" Nullable="false" Precision="3" />
+          <Property Name="Code" Type="Int32" Nullable="false" />
+          <Property Name="Name" Type="String" Nullable="false" MaxLength="100" FixedLength="false" Unicode="true" />
+          <Property Name="OpenPrice" Type="Double" Nullable="false" />
+          <Property Name="ClosePrice" Type="Double" Nullable="false" />
+          <Property Name="High" Type="Double" Nullable="false" />
+          <Property Name="Low" Type="Double" Nullable="false" />
+          <Property Name="Volumn" Type="Int32" Nullable="false" />
+          <Property Name="Amount" Type="Int64" />
+          <Property Name="Count" Type="Int32" />
+        </EntityType>
       </Schema>
     </edmx:ConceptualModels>
     <!-- C-S mapping content -->
     <edmx:Mappings>
       <Mapping Space="C-S" xmlns="http://schemas.microsoft.com/ado/2009/11/mapping/cs">
         <EntityContainerMapping StorageEntityContainer="StockModelStoreContainer" CdmEntityContainer="StockEntities">
-          <EntitySetMapping Name="Price">
-            <EntityTypeMapping TypeName="StockModel.Price">
-              <MappingFragment StoreEntitySet="Price">
-                <ScalarProperty Name="Count" ColumnName="Count" />
-                <ScalarProperty Name="Amount" ColumnName="Amount" />
-                <ScalarProperty Name="Volumn" ColumnName="Volumn" />
-                <ScalarProperty Name="Low" ColumnName="Low" />
-                <ScalarProperty Name="High" ColumnName="High" />
-                <ScalarProperty Name="ClosePrice" ColumnName="ClosePrice" />
-                <ScalarProperty Name="OpenPrice" ColumnName="OpenPrice" />
-                <ScalarProperty Name="Name" ColumnName="Name" />
-                <ScalarProperty Name="Code" ColumnName="Code" />
-                <ScalarProperty Name="Date" ColumnName="Date" />
-              </MappingFragment>
-            </EntityTypeMapping>
-          </EntitySetMapping>
           <EntitySetMapping Name="ThreeBigBuySell">
             <EntityTypeMapping TypeName="StockModel.ThreeBigBuySell">
               <MappingFragment StoreEntitySet="ThreeBigBuySell">
@@ -170,6 +154,22 @@
               <MappingFragment StoreEntitySet="ForeignOwn">
                 <ScalarProperty Name="A_OwnP" ColumnName="A_OwnP" />
                 <ScalarProperty Name="A_Own" ColumnName="A_Own" />
+                <ScalarProperty Name="Code" ColumnName="Code" />
+                <ScalarProperty Name="Date" ColumnName="Date" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="Price">
+            <EntityTypeMapping TypeName="StockModel.Price">
+              <MappingFragment StoreEntitySet="Price">
+                <ScalarProperty Name="Count" ColumnName="Count" />
+                <ScalarProperty Name="Amount" ColumnName="Amount" />
+                <ScalarProperty Name="Volumn" ColumnName="Volumn" />
+                <ScalarProperty Name="Low" ColumnName="Low" />
+                <ScalarProperty Name="High" ColumnName="High" />
+                <ScalarProperty Name="ClosePrice" ColumnName="ClosePrice" />
+                <ScalarProperty Name="OpenPrice" ColumnName="OpenPrice" />
+                <ScalarProperty Name="Name" ColumnName="Name" />
                 <ScalarProperty Name="Code" ColumnName="Code" />
                 <ScalarProperty Name="Date" ColumnName="Date" />
               </MappingFragment>

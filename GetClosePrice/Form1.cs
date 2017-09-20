@@ -16,6 +16,7 @@ using System.Windows.Forms;
 using GetClosePrice.Service;
 using AutoMapper;
 using GetClosePrice.Models;
+using HtmlAgilityPack;
 
 namespace GetClosePrice
 {
@@ -28,6 +29,12 @@ namespace GetClosePrice
 
         string _tseForeignOwnPath = "http://www.tse.com.tw/fund/MI_QFIIS?response=json&date={0}&selectType=ALLBUT0999&_=1503452481532";
         string _otcForeignOwnPath = "http://mops.twse.com.tw/server-java/t13sa150_otc";
+
+        //TODO update index price
+        string _tseIIndexPricePath = "http://www.tse.com.tw/exchangeReport/FMTQIK?response=json&date=20170801&_=1504775726324";
+        string _otcIndexPricePath = "http://www.tpex.org.tw/web/stock/aftertrading/daily_trading_index/st41_result.php?l=zh-tw&d=106/08/01&_=1504775959759";
+
+
         string _alertMessage = "";
         public readonly WebService webService;
         public readonly DbService dbService;
@@ -113,7 +120,7 @@ namespace GetClosePrice
                 count += dbService.Insert3BigBuySell(models);
             }
 
-            this.Message("執行完畢!", string.Format("更新三大法人每日買賣成功 : 共 {0} 筆", count));
+            this.Message("執行完畢!", string.Format("更新三大法人每日買賣成功 : 共 {0} 筆 \n", count));
             if (sender != null)
             {
                 MessageBox.Show(_alertMessage);
@@ -148,7 +155,7 @@ namespace GetClosePrice
             }
 
             //進度走完關閉進度條
-            this.Message("執行完畢!", string.Format("更新法人持股成功 : 共 {0} 筆", count));
+            this.Message("執行完畢!", string.Format("更新法人持股成功 : 共 {0} 筆 \n", count));
             MessageBox.Show(_alertMessage);
         }
 
@@ -178,12 +185,46 @@ namespace GetClosePrice
                 count += dbService.InsertPrice(models);
             }
 
-            this.Message("執行完畢!", string.Format("更新股價成功 : 共 {0} 筆", count));
+            this.Message("執行完畢!", string.Format("更新股價成功 : 共 {0} 筆 \n", count));
             if (sender != null)
             {
                 MessageBox.Show(_alertMessage);
             }
         }
+
+
+        /// <summary>
+        /// TODO 資料庫大盤指數更新
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void btn_update_total_price_Click(object sender, EventArgs e)
+        {
+            if (sender != null) _alertMessage = "";
+
+            // 設定日期
+            var begin = dt_begin.Value.Date;
+            var end = dt_end.Value.Date;
+
+            var count = 0;
+            foreach (var day in DateHelper.EachDay(begin, end))
+            {
+                this.Message("導出數據: " + day.ToString("yyyy/MM/dd") + "...");
+                var temp = GetStockPrice(day);
+                if (temp == null) continue;
+
+                this.Message("更新資料庫:" + day.ToString("yyyy/MM/dd") + "...");
+                var models = MappingPrice(day, temp);
+                count += dbService.InsertPrice(models);
+            }
+
+            this.Message("執行完畢!", string.Format("更新股價成功 : 共 {0} 筆 \n", count));
+            if (sender != null)
+            {
+                MessageBox.Show(_alertMessage);
+            }
+        }
+
 
         #region 私人方法
         /// <summary>
@@ -314,6 +355,87 @@ namespace GetClosePrice
         {
             dt_begin.Value = DateTime.Now;
             dt_end.Value = DateTime.Now;
+        }
+
+        /// <summary>
+        /// 更新大盤資訊
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void button3_Click(object sender, EventArgs e)
+        {
+            string tse_url = string.Format("http://www.tse.com.tw/exchangeReport/FMTQIK?response=json&date={0}&_=1505888895086", DateTime.Now.ToString("yyyyMMdd"));
+            string otc_url = string.Format("http://www.tpex.org.tw/web/stock/aftertrading/daily_trading_index/st41_result.php?l=zh-tw&d={0}&_=1505890120738",
+                DateHelper.ParseToTaiwanDate(DateTime.Now));
+               ;
+
+               string get_url = "https://script.google.com/macros/s/AKfycbzyyE7kUyBjW9HBxjdp4bIhsZbJaGCctY9LY0H30WiUoliuIZAy/exec?"; //打到excel google
+            
+            using (var wc = new WebClient())
+            {
+                //TSE 成交資訊
+                wc.Encoding = Encoding.UTF8;
+                var json = wc.DownloadString(tse_url);
+                if (json.Contains("很抱歉")) return;
+                var ssi = JsonConvert.DeserializeObject<TseModel>(json);
+                var date = ssi.data[ssi.data.Count() - 1][0];
+                var amount = ssi.data[ssi.data.Count() - 1][2];
+                var index = ssi.data[ssi.data.Count() - 1][4];
+
+                //OTC 成交資訊
+                wc.Encoding = Encoding.UTF8;
+                var json2 = wc.DownloadString(otc_url);
+                if (json2.Contains("很抱歉")) return;
+                var otc = JsonConvert.DeserializeObject<otcModel>(json2);
+                var amount2 = otc.aaData[otc.aaData.Count() - 1][2];
+                var index2 = otc.aaData[otc.aaData.Count() - 1][4];
+
+
+                //外匯
+                var xpath = @"//*[@id=""printhere""]/div[3]/table/tbody/tr";
+                var xpath2 = @"//*[@id=""printhere""]/div[3]/table/tbody/tr[{0}]/td[2]";
+                var doc = new HtmlAgilityPack.HtmlDocument();
+                wc.Encoding = Encoding.UTF8;
+                string page = wc.DownloadString("http://www.taifex.com.tw/chinese/3/3_5.asp");
+                doc.LoadHtml(page);
+                HtmlNodeCollection nodes = doc.DocumentNode.SelectNodes(xpath);
+                var count = nodes.Count;
+                var ntd = doc.DocumentNode.SelectNodes(string.Format(xpath2, count))[0].InnerText.Trim();
+               
+                //台指大小台留倉
+                var xpathFuture = @"//*[@id=""printhere""]/div[4]/table/tbody/tr[2]/td/table/tbody/tr[6]/td[12]";
+                var xpathFuture2 = @"//*[@id=""printhere""]/div[4]/table/tbody/tr[2]/td/table/tbody/tr[15]/td[12]";
+                doc = new HtmlAgilityPack.HtmlDocument();
+                wc.Encoding = Encoding.UTF8;
+                string pageFuture = wc.DownloadString("http://www.taifex.com.tw/chinese/3/7_12_3.asp");
+                doc.LoadHtml(pageFuture);
+                var future = doc.DocumentNode.SelectNodes(xpathFuture)[0].InnerText.Trim();
+                var future2 = doc.DocumentNode.SelectNodes(xpathFuture2)[0].InnerText.Trim();
+
+                //前五大留倉
+                var xpathFuture3 = @"//*[@id=""printhere""]/div[3]/table/tr[2]/td/table/tr[6]/td[2]/div";
+                var xpathFuture4 = @"//*[@id=""printhere""]/div[3]/table/tr[2]/td/table/tr[6]/td[6]/div";
+                doc = new HtmlAgilityPack.HtmlDocument();
+                wc.Encoding = Encoding.UTF8;
+                string pageFuture3 = wc.DownloadString("http://www.taifex.com.tw/chinese/3/7_8.asp");
+                doc.LoadHtml(pageFuture3);
+                var future3 = doc.DocumentNode.SelectNodes(xpathFuture3)[0].InnerText.Trim();
+                var future4 = doc.DocumentNode.SelectNodes(xpathFuture4)[0].InnerText.Trim();
+                var r1 = future3.Substring(future3.IndexOf('(')+1, future3.IndexOf(')') - future3.IndexOf('(') -1);  //前五特定法人買
+                var r2 = future4.Substring(future4.IndexOf('(')+1, future4.IndexOf(')') - future4.IndexOf('(') -1);  //前五特定法人賣
+                var r3 = float.Parse(r1) - float.Parse(r2);
+
+                get_url = string.Format("https://script.google.com/macros/s/AKfycbzyyE7kUyBjW9HBxjdp4bIhsZbJaGCctY9LY0H30WiUoliuIZAy/exec?date={0}&tseindex={1}&tsevol={2}&otcindex={3}&otcvol={4}&ntd={5}&fiveleave={6}&f1={7}&f2={8}",
+                    date, index, amount, index2, amount2, ntd, r3, future, future2);
+            }
+
+            using (var wc = new WebClient())
+            {
+                // 更新google excel 表格
+                var result = wc.DownloadString(get_url);
+            }
+
+            Message("更新完成");
         }
     }
 }
