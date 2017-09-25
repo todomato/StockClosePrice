@@ -105,6 +105,7 @@
       <DependentUpon>DbModel.tt</DependentUpon>
     </Compile>
     <Compile Include="Models\sii3BigModel.cs" />
+    <Compile Include="Models\ssiMargn.cs" />
     <Compile Include="Models\ThreeBigBuySell.cs">
       <DependentUpon>DbModel.tt</DependentUpon>
     </Compile>

@@ -367,7 +367,13 @@ namespace GetClosePrice
             string tse_url = string.Format("http://www.tse.com.tw/exchangeReport/FMTQIK?response=json&date={0}&_=1505888895086", DateTime.Now.ToString("yyyyMMdd"));
             string otc_url = string.Format("http://www.tpex.org.tw/web/stock/aftertrading/daily_trading_index/st41_result.php?l=zh-tw&d={0}&_=1505890120738",
                 DateHelper.ParseToTaiwanDate(DateTime.Now));
-               ;
+            var tse_margn_rul = string.Format(
+                   "http://www.twse.com.tw/exchangeReport/MI_MARGN?response=json&date={0}&selectType=MS&_=1506325392613"
+                       ,DateTime.Now.ToString("yyyyMMdd"));
+            var otc_margn_rul = string.Format(
+                 "http://www.twse.com.tw/exchangeReport/MI_MARGN?response=json&date=20170922&selectType=MS&_=1506325392613"
+                     , DateHelper.ParseToTaiwanDate(DateTime.Now));
+
 
                string get_url = "https://script.google.com/macros/s/AKfycbzyyE7kUyBjW9HBxjdp4bIhsZbJaGCctY9LY0H30WiUoliuIZAy/exec?"; //打到excel google
             
@@ -425,8 +431,32 @@ namespace GetClosePrice
                 var r2 = future4.Substring(future4.IndexOf('(')+1, future4.IndexOf(')') - future4.IndexOf('(') -1);  //前五特定法人賣
                 var r3 = float.Parse(r1) - float.Parse(r2);
 
-                get_url = string.Format("https://script.google.com/macros/s/AKfycbzyyE7kUyBjW9HBxjdp4bIhsZbJaGCctY9LY0H30WiUoliuIZAy/exec?date={0}&tseindex={1}&tsevol={2}&otcindex={3}&otcvol={4}&ntd={5}&fiveleave={6}&f1={7}&f2={8}",
-                    date, index, amount, index2, amount2, ntd, r3, future, future2);
+                //融資券變化 
+                wc.Encoding = Encoding.UTF8;
+                var json3 = wc.DownloadString(tse_margn_rul);
+                if (json3.Contains("很抱歉")) return;
+                var ssi_margn = JsonConvert.DeserializeObject<ssiMargn>(json3);
+                var sii_buy = 0.0;
+                 var sii_sell = 0.0;
+                if (ssi_margn.creditList.Count() != 0)
+                {
+                    sii_buy = (float.Parse(ssi_margn.creditList[2][5]) - float.Parse(ssi_margn.creditList[2][4])) / 100000;
+                    sii_sell = float.Parse(ssi_margn.creditList[1][5]) - float.Parse(ssi_margn.creditList[1][4]);
+                }
+
+                ////OTC融資券變化
+                ////http://www.tpex.org.tw/web/stock/margin_trading/margin_balance/margin_bal_result.php?l=zh-tw&d=106/09/21&_=1506325335449
+
+                //wc.Encoding = Encoding.UTF8;
+                //var json4 = wc.DownloadString(otc_margn_rul);
+                //if (json4.Contains("很抱歉")) return;
+                //var otc_margn = JsonConvert.DeserializeObject<otcModel>(json4);
+                //var otc_buy = float.Parse(otc_margn.aaData[2][5]) - float.Parse(otc_margn.aaData[2][4]);
+                //var otc_sell = float.Parse(otc_margn.aaData[1][5]) - float.Parse(otc_margn.aaData[1][4]);
+
+                get_url = string.Format("https://script.google.com/macros/s/AKfycbzyyE7kUyBjW9HBxjdp4bIhsZbJaGCctY9LY0H30WiUoliuIZAy/exec?date={0}&tseindex={1}&tsevol={2}&otcindex={3}&otcvol={4}&ntd={5}&fiveleave={6}&f1={7}&f2={8}&tsemargn={9}&tsemargn2={10}",
+                    date, index, amount, index2, amount2, ntd, r3, future, future2, sii_buy, sii_sell);
+
             }
 
             using (var wc = new WebClient())
