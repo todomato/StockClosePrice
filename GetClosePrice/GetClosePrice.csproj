@@ -110,6 +110,7 @@
       <DependentUpon>DbModel.tt</DependentUpon>
     </Compile>
     <Compile Include="Models\ForeignOwnViewModel.cs" />
+    <Compile Include="Models\threeBigModel.cs" />
     <Compile Include="Models\ThreeBigViewModel.cs" />
     <Compile Include="Models\TseModel.cs" />
     <Compile Include="Program.cs" />

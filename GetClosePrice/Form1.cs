@@ -367,6 +367,8 @@ namespace GetClosePrice
             string tse_url = string.Format("http://www.tse.com.tw/exchangeReport/FMTQIK?response=json&date={0}&_=1505888895086", DateTime.Now.ToString("yyyyMMdd"));
             string otc_url = string.Format("http://www.tpex.org.tw/web/stock/aftertrading/daily_trading_index/st41_result.php?l=zh-tw&d={0}&_=1505890120738",
                 DateHelper.ParseToTaiwanDate(DateTime.Now));
+            string threebig_url = string.Format("http://www.tse.com.tw/fund/BFI82U?response=json&dayDate={0}&type=day&_=1517908423710",
+               DateTime.Now.ToString("yyyyMMdd"));
             var tse_margn_rul = string.Format(
                    "http://www.twse.com.tw/exchangeReport/MI_MARGN?response=json&date={0}&selectType=MS&_=1506325392613"
                        ,DateTime.Now.ToString("yyyyMMdd"));
@@ -396,6 +398,15 @@ namespace GetClosePrice
                 var amount2 = otc.aaData[otc.aaData.Count() - 1][2];
                 var index2 = otc.aaData[otc.aaData.Count() - 1][4];
 
+                //三大法人買賣超
+                wc.Encoding = Encoding.UTF8;
+                var json4 = wc.DownloadString(threebig_url);
+                if (json4.Contains("很抱歉")) return;
+                var threebig = JsonConvert.DeserializeObject<threeBigModel>(json4);
+                var threebig1 = Math.Round(long.Parse(threebig.data[threebig.data.Count() - 6][3].Replace(",", "")) / 100000000.00, 2);    //自營
+                var threebig2 = Math.Round(long.Parse(threebig.data[threebig.data.Count() - 5][3].Replace(",", "")) / 100000000.00, 2);    //自營避險
+                var threebig3 = Math.Round(long.Parse(threebig.data[threebig.data.Count() - 4][3].Replace(",", "")) / 100000000.00, 2);    //投信
+                var threebig4 = Math.Round(long.Parse(threebig.data[threebig.data.Count() - 3][3].Replace(",", "")) / 100000000.00, 2);    //外資
 
                 //外匯
                 var xpath = @"//*[@id=""printhere""]/div[3]/table/tbody/tr";
@@ -454,8 +465,9 @@ namespace GetClosePrice
                 //var otc_buy = float.Parse(otc_margn.aaData[2][5]) - float.Parse(otc_margn.aaData[2][4]);
                 //var otc_sell = float.Parse(otc_margn.aaData[1][5]) - float.Parse(otc_margn.aaData[1][4]);
 
-                get_url = string.Format("https://script.google.com/macros/s/AKfycbzyyE7kUyBjW9HBxjdp4bIhsZbJaGCctY9LY0H30WiUoliuIZAy/exec?date={0}&tseindex={1}&tsevol={2}&otcindex={3}&otcvol={4}&ntd={5}&fiveleave={6}&f1={7}&f2={8}&tsemargn={9}&tsemargn2={10}",
-                    date, index, amount, index2, amount2, ntd, r3, future, future2, sii_buy, sii_sell);
+                get_url = string.Format("https://script.google.com/macros/s/AKfycbzyyE7kUyBjW9HBxjdp4bIhsZbJaGCctY9LY0H30WiUoliuIZAy/exec?date={0}&tseindex={1}&tsevol={2}&otcindex={3}&otcvol={4}&ntd={5}&fiveleave={6}&f1={7}&f2={8}&tsemargn={9}&tsemargn2={10}&threebig1={11}&threebig2={12}&threebig3={13}&threebig4={14}",
+                    date, index, amount, index2, amount2, ntd, r3, future, future2, sii_buy, sii_sell
+                    , threebig1, threebig2, threebig3, threebig4);
 
             }
 
@@ -466,6 +478,16 @@ namespace GetClosePrice
             }
 
             Message("更新完成");
+        }
+
+        /// <summary>
+        /// 每日三大法人買賣統計
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void btn_daily_3big_Click(object sender, EventArgs e)
+        {
+
         }
     }
 }

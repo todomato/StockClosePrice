@@ -43,6 +43,7 @@
             this.button2 = new System.Windows.Forms.Button();
             this.btn_today = new System.Windows.Forms.Button();
             this.button3 = new System.Windows.Forms.Button();
+            this.btn_daily_3big = new System.Windows.Forms.Button();
             this.SuspendLayout();
             // 
             // btn_download
@@ -175,11 +176,22 @@
             this.button3.UseVisualStyleBackColor = true;
             this.button3.Click += new System.EventHandler(this.button3_Click);
             // 
+            // btn_daily_3big
+            // 
+            this.btn_daily_3big.Location = new System.Drawing.Point(403, 150);
+            this.btn_daily_3big.Name = "btn_daily_3big";
+            this.btn_daily_3big.Size = new System.Drawing.Size(93, 23);
+            this.btn_daily_3big.TabIndex = 15;
+            this.btn_daily_3big.Text = "三大每日統計";
+            this.btn_daily_3big.UseVisualStyleBackColor = true;
+            this.btn_daily_3big.Click += new System.EventHandler(this.btn_daily_3big_Click);
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(523, 261);
+            this.Controls.Add(this.btn_daily_3big);
             this.Controls.Add(this.button3);
             this.Controls.Add(this.btn_today);
             this.Controls.Add(this.button2);
@@ -218,6 +230,7 @@
         private System.Windows.Forms.Button button2;
         private System.Windows.Forms.Button btn_today;
         private System.Windows.Forms.Button button3;
+        private System.Windows.Forms.Button btn_daily_3big;
     }
 }
 
